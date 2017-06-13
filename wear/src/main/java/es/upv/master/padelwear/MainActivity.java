@@ -3,6 +3,7 @@ package es.upv.master.padelwear;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.wearable.view.CurvedChildLayoutManager;
 import android.support.wearable.view.WearableRecyclerView;
 import android.view.View;
 import android.widget.Toast;
@@ -29,5 +30,8 @@ public class MainActivity extends Activity {
             }
         });
         lista.setAdapter(adaptador);
+        lista.setCenterEdgeItems(true);
+        //lista.setLayoutManager(new CurvedChildLayoutManager(this));
+        lista.setLayoutManager(new MyChildLayoutManager(this));
     }
 }
