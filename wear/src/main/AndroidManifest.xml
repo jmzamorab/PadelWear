@@ -3,6 +3,7 @@
     package="es.upv.master.padelwear">
 
     <uses-feature android:name="android.hardware.type.watch" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -19,10 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Confirmacion"/>
-        <activity android:name=".Pasos"/>
-        <activity android:name=".Historial"/>
-        <activity android:name=".CuentaAtras"/>
+        <activity android:name=".Confirmacion" android:theme="@style/AppThemeNoSwipeToDismiss"/>
+        <activity android:name=".Pasos" android:theme="@style/AppTheme"/>
+        <activity android:name=".Historial" android:theme="@style/AppThemeNoSwipeToDismiss"/>
+        <activity android:name=".CuentaAtras" android:theme="@style/AppTheme"/>
+        <activity android:name=".SwipeDismiss" android:theme="@style/AppTheme"/>
+        <activity android:name=".Contador" android:theme="@style/AppThemeNoSwipeToDismiss"/>
+
     </application>
 
 </manifest>
