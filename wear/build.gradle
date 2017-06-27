@@ -20,7 +20,9 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+
     compile 'com.google.android.support:wearable:2.0.3'
+    provided 'com.google.android.wearable:wearable:2.0.3'
     compile 'com.google.android.gms:play-services-wearable:11.0.0'
     compile project(':comun')
 }
