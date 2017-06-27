@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.wearable.view.DismissOverlayView;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,11 +20,15 @@ public class Contador extends Activity {
     private Vibrator vibrador;
     private long[] vibrEntrada = {0l, 500};
     private long[] vibrDeshacer = {0l, 500, 500, 500};
+    private DismissOverlayView dismissOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.contador);
+        dismissOverlay = (DismissOverlayView) findViewById(R.id.dismiss_overlay);
+        dismissOverlay.setIntroText("Para salir de la aplicación, haz una pulsación larga");
+        dismissOverlay.showIntroIfNecessary();
         partida = new Partida();
         vibrador = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         misPuntos = (TextView) findViewById(R.id.misPuntos);
@@ -36,6 +41,8 @@ public class Contador extends Activity {
         View fondo = findViewById(R.id.fondo);
         fondo.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(Contador.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
+                @Override public void onLongPress(MotionEvent e) { dismissOverlay.show(); }
+
                 @Override
                 public boolean onArriba(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.rehacerPunto();
@@ -61,6 +68,8 @@ public class Contador extends Activity {
         });
         misPuntos.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(Contador.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
+                @Override public void onLongPress(MotionEvent e) { dismissOverlay.show(); }
+
                 @Override
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(true);
@@ -78,6 +87,8 @@ public class Contador extends Activity {
         });
         susPuntos.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(Contador.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
+                @Override public void onLongPress(MotionEvent e) { dismissOverlay.show(); }
+
                 @Override
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(false);
