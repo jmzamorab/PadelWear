@@ -28,7 +28,7 @@ public class Contador extends WearableActivity {//extends Activity {
     private Typeface fuenteFina = Typeface.create("sans-serif-thin", 0);
 
 
-    @Override
+    //@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setAmbientEnabled();
