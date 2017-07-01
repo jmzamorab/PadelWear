@@ -1,5 +1,7 @@
 package es.upv.master.comun;
 
+import android.util.Log;
+
 import java.util.Vector;
 
 public class Partida {
@@ -7,6 +9,7 @@ public class Partida {
     private Vector<Puntuacion> partidaRehacer;
 
     public Partida() {
+        Log.wtf("COMUN", "econtructor");
         puntos = new Vector<Puntuacion>();
         puntos.add(new Puntuacion());
         partidaRehacer = new Vector<Puntuacion>();
