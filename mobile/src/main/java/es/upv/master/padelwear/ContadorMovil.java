@@ -5,25 +5,62 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataItemBuffer;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Wearable;
+
 import es.upv.master.comun.DireccionesGestureDetector;
 import es.upv.master.comun.Partida;
 
 
-public class ContadorMovil extends Activity {
+public class ContadorMovil extends Activity implements MessageApi.MessageListener,
+                                                        GoogleApiClient.ConnectionCallbacks,
+                                                       DataApi.DataListener {
     private Partida partida;
     private TextView misPuntos, misJuegos, misSets, susPuntos, susJuegos, susSets, hora;
     private Vibrator vibrador;
     private long[] vibrEntrada = {0l, 500};
     private long[] vibrDeshacer = {0l, 500, 500, 500};
+    private GoogleApiClient apiClient;
+
+    //Bundle parametros;
+    private static final String MOVIL_ARRANCAR_ACTIVIDAD = "/start_paddle";
+    private static final String WEAR_PUNTUACION = "/puntuacion";
+    private static final String KEY_MIS_PUNTOS = "com.example.padel.key.mis_puntos";
+    private static final String KEY_MIS_JUEGOS = "com.example.padel.key.mis_juegos";
+    private static final String KEY_MIS_SETS = "com.example.padel.key.mis_sets";
+    private static final String KEY_SUS_PUNTOS = "com.example.padel.key.sus_puntos";
+    private static final String KEY_SUS_JUEGOS = "com.example.padel.key.sus_juegos";
+    private static final String KEY_SUS_SETS = "com.example.padel.key.sus_sets";
 
 
-    //@Override
+    private String sMisPuntos;
+    private String sMisJuegos;
+    private String sMisSets;
+    private String sSusJuegos;
+    private String sSusPuntos;
+    private String sSusSets;
+
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.wtf("Partida Movil", "pasado onCreate");
@@ -32,6 +69,10 @@ public class ContadorMovil extends Activity {
         // Evitar que entre en modo ambiente .... ¿entra, el emulador?
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Log.wtf("Partida Movil", "ANTES de llamara al contructor de PARTIDA que es de COMUN");
+        apiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).addConnectionCallbacks(this).build();
+        Log.wtf("Partida Movil", "apiClient Creado");
+       // parametros = this.getIntent().getExtras();
+
         partida = new Partida();
         Log.wtf("Partida Movil", "PARTIDA creada");
         vibrador = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -42,6 +83,8 @@ public class ContadorMovil extends Activity {
         misSets = (TextView) findViewById(R.id.misSets);
         susSets = (TextView) findViewById(R.id.susSets);
         hora = (TextView) findViewById(R.id.hora);
+
+        Log.wtf("Partida Movil", "Entra no por cambio de datos .....");
         actualizaNumeros();
         View fondo = findViewById(R.id.fondo);
         fondo.setOnTouchListener(new View.OnTouchListener() {
@@ -103,9 +146,37 @@ public class ContadorMovil extends Activity {
                 return true;
             }
         });
+
+        PendingResult<DataItemBuffer> resultado = Wearable.DataApi.getDataItems(apiClient);
+        resultado.setResultCallback(new ResultCallback<DataItemBuffer>() {
+            @Override
+            public void onResult(DataItemBuffer dataItems) {
+                Log.wtf("Partida Movil", "Llega de cambio de datos .... ");
+                for (DataItem dataItem : dataItems) {
+                    if (dataItem.getUri().getPath().equals(WEAR_PUNTUACION)) {
+                        DataMap dataMap = DataMapItem.fromDataItem(dataItem).getDataMap();
+                        sMisPuntos = dataMap.getString(KEY_MIS_PUNTOS);
+                        sMisJuegos = dataMap.getString(KEY_MIS_JUEGOS);
+                        sMisSets = dataMap.getString(KEY_MIS_SETS);
+                        sSusJuegos = dataMap.getString(KEY_SUS_JUEGOS);
+                        sSusPuntos = dataMap.getString(KEY_SUS_PUNTOS);
+                        sSusSets = dataMap.getString(KEY_SUS_SETS);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                actualizaNumerosParam();
+                            }
+                        });
+                    }
+                }
+                dataItems.release();
+            }
+        });
+
     }
 
     void actualizaNumeros() {
+        Log.wtf("Partida Movil", "ActualizaNúmeros");
         misPuntos.setText(partida.getMisPuntos());
         susPuntos.setText(partida.getSusPuntos());
         misJuegos.setText(partida.getMisJuegos());
@@ -113,4 +184,92 @@ public class ContadorMovil extends Activity {
         misSets.setText(partida.getMisSets());
         susSets.setText(partida.getSusSets());
     }
+
+    void actualizaNumerosParam() {
+        Log.wtf("Partida Movil", "Actualiza Numeros Param");
+
+        misPuntos.setText(sMisPuntos);
+        susPuntos.setText(sSusPuntos);
+        misSets.setText(sMisSets);
+        susSets.setText(sSusSets);
+        susJuegos.setText(sSusJuegos);
+        misJuegos.setText(sMisJuegos);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.wtf("Partida Movil", "OnStart");
+         apiClient.connect();
+    }
+
+
+    @Override
+    protected void onStop() {
+        Wearable.MessageApi.removeListener(apiClient, this);
+        //Wearable.DataApi.removeListener(apiClient, this);//esto seria de contador con tu metodo
+        if (apiClient != null && apiClient.isConnected()) {
+            apiClient.disconnect();
+        }
+        Wearable.DataApi.removeListener(apiClient, this);
+        super.onStop();
+    }
+
+
+    @Override
+    public void onDataChanged(DataEventBuffer eventos) {
+        for (DataEvent evento : eventos) {
+            if (evento.getType() == DataEvent.TYPE_CHANGED) {
+                DataItem item = evento.getDataItem();
+                if (item.getUri().getPath().equals(WEAR_PUNTUACION)) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    sMisPuntos = dataMap.getString(KEY_MIS_PUNTOS);
+                    sMisJuegos = dataMap.getString(KEY_MIS_JUEGOS);
+                    sMisSets = dataMap.getString(KEY_MIS_SETS);
+                    sSusJuegos = dataMap.getString(KEY_SUS_JUEGOS);
+                    sSusPuntos = dataMap.getString(KEY_SUS_PUNTOS);
+                    sSusSets = dataMap.getString(KEY_SUS_SETS);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            actualizaNumerosParam();
+                        }
+                    });
+                }
+            } else if (evento.getType() == DataEvent.TYPE_DELETED) { // Algún ítem ha sido borrado } } }
+            }
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Wearable.MessageApi.addListener(apiClient, this);
+        Wearable.DataApi.addListener(apiClient, this);
+        //Wearable.MessageApi.addListener(apiClient, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+
+    @Override
+    public void onMessageReceived(final MessageEvent mensaje) {
+        Log.wtf("Partida Movil", "Ha llegado un mensaje .... ");
+        if (mensaje.getPath().equalsIgnoreCase(MOVIL_ARRANCAR_ACTIVIDAD)) {
+            Log.wtf("Partida Movil", "EL mensaje es el de arrancar actividad .... ");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    actualizaNumeros();
+                }
+            });
+        }
+    }
+
+
+
+
 }

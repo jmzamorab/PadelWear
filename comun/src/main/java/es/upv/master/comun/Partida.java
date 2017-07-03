@@ -7,6 +7,7 @@ import java.util.Vector;
 public class Partida {
     private Vector<Puntuacion> puntos;
     private Vector<Puntuacion> partidaRehacer;
+    private String kk;
 
     public Partida() {
         Log.wtf("COMUN", "econtructor");
@@ -54,6 +55,36 @@ public class Partida {
     public String getSusPuntos() {
         return Puntuacion.puntos[puntos.lastElement().getSuPuntuacion()];
     }
+
+    public Byte getMisPuntosByte() {
+        return puntos.lastElement().getMiPuntuacion();
+    }
+
+    public Byte getSusPuntosByte()
+    {
+        return puntos.lastElement().getSuPuntuacion();
+    }
+
+    public Byte getMisJuegosByte()
+    {
+        return puntos.lastElement().getMisJuegos();
+    }
+
+    public Byte getSusJuegosByte()
+    {
+        return puntos.lastElement().getSusJuegos();
+    }
+
+    public Byte getMisSetsByte()
+    {
+        return puntos.lastElement().getMisSets();
+    }
+
+    public Byte getSusSetsByte() {
+        return puntos.lastElement().getSusSets();
+    }
+
+
 
    /* public int getMisJuegos(){
         return partida.lastElement().getMisJuegos();

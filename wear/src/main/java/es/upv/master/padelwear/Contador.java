@@ -13,10 +13,14 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
@@ -39,6 +43,14 @@ public class Contador extends WearableActivity {//extends Activity {
     private static final String MOVIL_ARRANCAR_ACTIVIDAD = "/start_paddle";
     private GoogleApiClient apiClient;
 
+    private static final String WEAR_PUNTUACION = "/puntuacion";
+    private static final String KEY_MIS_PUNTOS = "com.example.padel.key.mis_puntos";
+    private static final String KEY_MIS_JUEGOS = "com.example.padel.key.mis_juegos";
+    private static final String KEY_MIS_SETS = "com.example.padel.key.mis_sets";
+    private static final String KEY_SUS_PUNTOS = "com.example.padel.key.sus_puntos";
+    private static final String KEY_SUS_JUEGOS = "com.example.padel.key.sus_juegos";
+    private static final String KEY_SUS_SETS = "com.example.padel.key.sus_sets";
+
     //@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +70,7 @@ public class Contador extends WearableActivity {//extends Activity {
         misSets = (TextView) findViewById(R.id.misSets);
         susSets = (TextView) findViewById(R.id.susSets);
         hora = (TextView) findViewById(R.id.hora);
-        actualizaNumeros();
+        actualizaNumeros(false);
         View fondo = findViewById(R.id.fondo);
         fondo.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(Contador.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
@@ -71,7 +83,7 @@ public class Contador extends WearableActivity {//extends Activity {
                 public boolean onArriba(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.rehacerPunto();
                     vibrador.vibrate(vibrDeshacer, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(true);
                     return true;
                 }
 
@@ -79,7 +91,7 @@ public class Contador extends WearableActivity {//extends Activity {
                 public boolean onAbajo(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.deshacerPunto();
                     vibrador.vibrate(vibrDeshacer, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(true);
                     return true;
                 }
             });
@@ -101,7 +113,7 @@ public class Contador extends WearableActivity {//extends Activity {
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(true);
                     vibrador.vibrate(vibrEntrada, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(true);
                     return true;
                 }
             });
@@ -123,7 +135,7 @@ public class Contador extends WearableActivity {//extends Activity {
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(false);
                     vibrador.vibrate(vibrEntrada, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(true);
                     return true;
                 }
             });
@@ -218,15 +230,39 @@ public class Contador extends WearableActivity {//extends Activity {
     public void onUpdateAmbient() {
         super.onUpdateAmbient();
         // Actualizar contenido
-        actualizaNumeros();
+        actualizaNumeros(true);
     }
 
-    void actualizaNumeros() {
+    void actualizaNumeros(boolean sync) {
         misPuntos.setText(partida.getMisPuntos());
         susPuntos.setText(partida.getSusPuntos());
         misJuegos.setText(partida.getMisJuegos());
         susJuegos.setText(partida.getSusJuegos());
         misSets.setText(partida.getMisSets());
         susSets.setText(partida.getSusSets());
+        if (sync)
+           sincronizaDatos();
+
     }
+
+    private void sincronizaDatos() {
+        Log.wtf("Padel Wear", "Sincronizando");
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create(WEAR_PUNTUACION);
+        // manual lo inserta como Bytes, invocando a funciones que no existen getMisPuntosBytes()...
+
+        putDataMapReq.getDataMap().putString(KEY_MIS_PUNTOS, partida.getMisPuntos());
+        putDataMapReq.getDataMap().putString(KEY_MIS_JUEGOS, partida.getMisJuegos());
+        putDataMapReq.getDataMap().putString(KEY_MIS_SETS, partida.getMisSets());
+        putDataMapReq.getDataMap().putString(KEY_SUS_JUEGOS, partida.getSusJuegos());
+        putDataMapReq.getDataMap().putString(KEY_SUS_PUNTOS, partida.getSusPuntos());
+        putDataMapReq.getDataMap().putString(KEY_SUS_SETS, partida.getSusSets());
+        Log.wtf("Padel Wear", "Terminado Parametros");
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        Log.wtf("Padel Wear", "Creado putDataReq");
+        //Wearable.DataApi.putDataItem(apiClient, putDataReq);
+        //mandarMensaje(WEAR_PUNTUACION, "");
+        PendingResult<DataApi.DataItemResult> resultado = Wearable.DataApi.putDataItem(apiClient, putDataReq);
+        //mandarMensaje(WEAR_PUNTUACION, "");
+    }
+
 }

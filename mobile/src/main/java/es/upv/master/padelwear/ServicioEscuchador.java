@@ -12,6 +12,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 public class ServicioEscuchador extends WearableListenerService {
     private static final String MOVIL_ARRANCAR_ACTIVIDAD="/start_paddle";
+    private static final String WEAR_PUNTUACION = "/puntuacion";
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
