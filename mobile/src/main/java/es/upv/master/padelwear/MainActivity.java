@@ -122,6 +122,11 @@ public class MainActivity extends AppCompatActivity// implements MessageApi.Mess
             mandarFoto();
             return true;
         }
+        if (id == R.id.pasos) {
+            Log.wtf("Partida Movil", "Mandar foto al wear");
+            startActivity(new Intent(this, Pasos2.class));
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
