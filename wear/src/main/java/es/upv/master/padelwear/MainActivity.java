@@ -4,17 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.WearableRecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,25 +20,20 @@ import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import static es.upv.master.padelwear.R.layout.contador;
-
 public class MainActivity extends Activity
-    implements  DataApi.DataListener,
-    GoogleApiClient.ConnectionCallbacks{
+        implements DataApi.DataListener,
+        GoogleApiClient.ConnectionCallbacks {
 
     private GoogleApiClient apiClient;
     private static final String ITEM_FOTO = "/item_foto";
     private static final String ASSET_FOTO = "/asset_foto";
-    String[] elementos = {"Partida", "Terminar partida", "Historial", "Notificación", "Pasos", "Pulsaciones", "Terminar partida", "SwipeDismiss"};
+    String[] elementos = {"Partida", "Terminar partida", "Historial", "Jugadores", "Notificación", "Pasos", "Pulsaciones", "Terminar partida", "SwipeDismiss"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +57,9 @@ public class MainActivity extends Activity
                     case 2:
                         startActivity((new Intent(MainActivity.this, Historial.class)));
                         break;
+                    case 3:
+                        startActivity(new Intent(MainActivity.this, Jugadores.class));
+                        break;
                     case 4:
                         startActivity(new Intent(MainActivity.this, Pasos.class));
                         break;
@@ -82,7 +77,6 @@ public class MainActivity extends Activity
         lista.setScrollDegreesPerScreen(180);
         lista.setBezelWidth(0.5f);
     }
-
 
 
     @Override
@@ -109,7 +103,6 @@ public class MainActivity extends Activity
     public void onConnectionSuspended(int i) {
 
     }
-
 
 
     class LoadBitmapFromAsset extends AsyncTask<Asset, Void, Bitmap> {

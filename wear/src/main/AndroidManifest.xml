@@ -29,6 +29,7 @@
         <activity android:name=".CuentaAtras" android:theme="@style/AppTheme"/>
         <activity android:name=".SwipeDismiss" android:theme="@style/AppTheme"/>
         <activity android:name=".Contador" android:theme="@style/AppThemeNoSwipeToDismiss"/>
+        <activity android:name=".Jugadores"/>
 
     </application>
 
