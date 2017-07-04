@@ -13,4 +13,10 @@
         android:orderInCategory="1"
         android:title="Partida"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/tomar_foto"
+        android:orderInCategory="2"
+        android:title="mandar Foto"
+        app:showAsAction="ifRoom" />
 </menu>

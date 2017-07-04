@@ -85,7 +85,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
         hora = (TextView) findViewById(R.id.hora);
 
         Log.wtf("Partida Movil", "Entra no por cambio de datos .....");
-        actualizaNumeros();
+        actualizaNumeros(false);
         View fondo = findViewById(R.id.fondo);
         fondo.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(ContadorMovil.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
@@ -93,7 +93,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
                 public boolean onArriba(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.rehacerPunto();
                     vibrador.vibrate(vibrDeshacer, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(false);
                     return true;
                 }
 
@@ -101,7 +101,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
                 public boolean onAbajo(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.deshacerPunto();
                     vibrador.vibrate(vibrDeshacer, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(false);
                     return true;
                 }
             });
@@ -118,7 +118,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(true);
                     vibrador.vibrate(vibrEntrada, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(false);
                     return true;
                 }
             });
@@ -135,7 +135,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(false);
                     vibrador.vibrate(vibrEntrada, -1);
-                    actualizaNumeros();
+                    actualizaNumeros(false);
                     return true;
                 }
             });
@@ -175,14 +175,23 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
 
     }
 
-    void actualizaNumeros() {
+    void actualizaNumeros(Boolean lInic) {
         Log.wtf("Partida Movil", "ActualizaNúmeros");
+        if (lInic){
+            misPuntos.setText("0");
+            susPuntos.setText("0");
+            misJuegos.setText("0");
+            susJuegos.setText("0");
+            misSets.setText("0");
+            susSets.setText("0");
+        }
+        else{
         misPuntos.setText(partida.getMisPuntos());
         susPuntos.setText(partida.getSusPuntos());
         misJuegos.setText(partida.getMisJuegos());
         susJuegos.setText(partida.getSusJuegos());
         misSets.setText(partida.getMisSets());
-        susSets.setText(partida.getSusSets());
+        susSets.setText(partida.getSusSets());}
     }
 
     void actualizaNumerosParam() {
@@ -209,10 +218,10 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
     protected void onStop() {
         Wearable.MessageApi.removeListener(apiClient, this);
         //Wearable.DataApi.removeListener(apiClient, this);//esto seria de contador con tu metodo
+        Wearable.DataApi.removeListener(apiClient, this);
         if (apiClient != null && apiClient.isConnected()) {
             apiClient.disconnect();
         }
-        Wearable.DataApi.removeListener(apiClient, this);
         super.onStop();
     }
 
@@ -263,7 +272,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    actualizaNumeros();
+                    actualizaNumeros(true);
                 }
             });
         }
