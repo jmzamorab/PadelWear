@@ -30,6 +30,8 @@ import es.upv.master.comun.DireccionesGestureDetector;
 import es.upv.master.comun.Partida;
 
 
+
+
 public class ContadorMovil extends Activity implements MessageApi.MessageListener,
                                                         GoogleApiClient.ConnectionCallbacks,
                                                        DataApi.DataListener {
@@ -184,6 +186,13 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
             susJuegos.setText("0");
             misSets.setText("0");
             susSets.setText("0");
+
+            // REPENSAR
+            // Hacer que la clase ContadorPasos sea un Singleton
+            // de manera que en Main voya actualizando su contador
+            // y desde Contador "reinicio" o pido datos
+            /*MainActivity.contadorPasos.init();
+            MainActivity.contadorPasos.getContadorPasos()*/
         }
         else{
         misPuntos.setText(partida.getMisPuntos());

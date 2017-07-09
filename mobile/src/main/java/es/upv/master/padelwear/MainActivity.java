@@ -1,7 +1,12 @@
 package es.upv.master.padelwear;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -12,6 +17,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -25,21 +31,29 @@ import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 //adb -d forward tcp:5601 tcp:5601
-public class MainActivity extends AppCompatActivity// implements MessageApi.MessageListener,                                                               GoogleApiClient.ConnectionCallbacks
+public class MainActivity extends AppCompatActivity implements SensorEventListener
 {
-     public static GoogleApiClient apiClient;
-    //  private static final String MOVIL_ARRANCAR_ACTIVIDAD = "/start_paddle";
 
+    public static ContadorPasosSet contadorPasos;
+    private SensorManager sensorManager;
+    public static GoogleApiClient apiClient;
+
+    private Integer contadorPasosSet;
+    private Integer contadorSet;
     private static final String ITEM_FOTO = "/item_foto";
     private static final String ASSET_FOTO = "/asset_foto";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        contadorPasos = new ContadorPasosSet();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         apiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,13 +62,39 @@ public class MainActivity extends AppCompatActivity// implements MessageApi.Mess
                         .setAction("Action", null).show();
             }
         });
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    }
 
+    public void init()
+    {
+        contadorPasosSet = 0;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         apiClient.connect();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if (sensor != null) {
+            sensorManager.registerListener((SensorEventListener) this, sensor, SensorManager.SENSOR_DELAY_UI);
+        } else {
+            Toast.makeText(this, "¡Contador de pasos no encontrado!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        contadorPasosSet = Math.round(event.values[0]);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     @Override

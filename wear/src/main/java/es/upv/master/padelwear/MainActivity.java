@@ -33,7 +33,7 @@ public class MainActivity extends Activity
     private GoogleApiClient apiClient;
     private static final String ITEM_FOTO = "/item_foto";
     private static final String ASSET_FOTO = "/asset_foto";
-    String[] elementos = {"Partida", "Terminar partida", "Historial", "Jugadores", "Notificación", "Pasos", "Pulsaciones", "Terminar partida", "SwipeDismiss"};
+    String[] elementos = {"Partida", "Terminar partida", "Historial", "Jugadores", "Notificación", "Pasos", "Pulsaciones", "SwipeDismiss"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +62,9 @@ public class MainActivity extends Activity
                         break;
                     case 4:
                         startActivity(new Intent(MainActivity.this, Pasos.class));
+                        break;
+                    case 5:
+                        startActivity(new Intent(MainActivity.this, CuentaPasos.class));
                         break;
                     case 7:
                         startActivity(new Intent(MainActivity.this, SwipeDismiss.class));

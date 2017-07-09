@@ -35,5 +35,10 @@
             android:layout_gravity="bottom|right"
             android:background="@null"
             android:src="@drawable/cancelar" />
+
+        <android.support.wearable.view.DismissOverlayView
+            android:id="@+id/dismiss_overlay_conf"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </FrameLayout>
 </android.support.wearable.view.BoxInsetLayout>

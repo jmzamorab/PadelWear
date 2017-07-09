@@ -3,17 +3,24 @@
     package="es.upv.master.padelwear">
 
     <uses-feature android:name="android.hardware.type.watch" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-feature android:name="android.hardware.sensor.stepcounter" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
-        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
-        <uses-library android:name="com.google.android.wearable" android:required="false" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="false" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -23,13 +30,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Confirmacion" android:theme="@style/AppThemeNoSwipeToDismiss"/>
-        <activity android:name=".Pasos" android:theme="@style/AppTheme"/>
-        <activity android:name=".Historial" android:theme="@style/AppThemeNoSwipeToDismiss"/>
-        <activity android:name=".CuentaAtras" android:theme="@style/AppTheme"/>
-        <activity android:name=".SwipeDismiss" android:theme="@style/AppTheme"/>
-        <activity android:name=".Contador" android:theme="@style/AppThemeNoSwipeToDismiss"/>
-        <activity android:name=".Jugadores"/>
+        <activity
+            android:name=".Confirmacion"
+            android:theme="@style/AppThemeNoSwipeToDismiss" />
+        <activity
+            android:name=".Pasos"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".Historial"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".CuentaAtras"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".SwipeDismiss"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".CuentaPasos"/>
+        <activity
+            android:name=".Contador"
+            android:theme="@style/AppThemeNoSwipeToDismiss" />
+        <activity android:name=".Jugadores" />
 
     </application>
 
