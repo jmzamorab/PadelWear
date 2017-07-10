@@ -46,9 +46,14 @@
             android:name=".SwipeDismiss"
             android:theme="@style/AppTheme" />
         <activity android:name=".CuentaPasos"/>
+        <activity android:name=".FrecuenciaCardiaca"/>
         <activity
-            android:name=".Contador"
-            android:theme="@style/AppThemeNoSwipeToDismiss" />
+        android:name=".Contador"
+        android:theme="@style/AppThemeNoSwipeToDismiss" />
+        <activity
+            android:name=".Contador2"
+            android:theme="@style/AppTheme" />
+
         <activity android:name=".Jugadores" />
 
     </application>

@@ -31,15 +31,13 @@ import java.io.ByteArrayOutputStream;
 import java.util.Date;
 
 //adb -d forward tcp:5601 tcp:5601
-public class MainActivity extends AppCompatActivity implements SensorEventListener
+public class MainActivity extends AppCompatActivity
 {
 
-    public static ContadorPasosSet contadorPasos;
-    private SensorManager sensorManager;
     public static GoogleApiClient apiClient;
 
-    private Integer contadorPasosSet;
-    private Integer contadorSet;
+    //private Integer contadorPasosSet;
+    private Boolean isFirst = true;
     private static final String ITEM_FOTO = "/item_foto";
     private static final String ASSET_FOTO = "/asset_foto";
 
@@ -49,7 +47,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        contadorPasos = new ContadorPasosSet();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         apiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).build();
@@ -62,13 +59,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         .setAction("Action", null).show();
             }
         });
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
     }
 
-    public void init()
+  /*  public void init()
     {
         contadorPasosSet = 0;
-    }
+    }*/
 
     @Override
     protected void onStart() {
@@ -76,28 +72,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         apiClient.connect();
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        if (sensor != null) {
-            sensorManager.registerListener((SensorEventListener) this, sensor, SensorManager.SENSOR_DELAY_UI);
-        } else {
-            Toast.makeText(this, "¡Contador de pasos no encontrado!", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        contadorPasosSet = Math.round(event.values[0]);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
-
-    @Override
+  @Override
     protected void onStop() {
         if (apiClient != null && apiClient.isConnected()) {
             apiClient.disconnect();

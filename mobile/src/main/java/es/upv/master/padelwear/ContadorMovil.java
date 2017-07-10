@@ -2,7 +2,10 @@ package es.upv.master.padelwear;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
@@ -11,6 +14,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -30,12 +34,13 @@ import es.upv.master.comun.DireccionesGestureDetector;
 import es.upv.master.comun.Partida;
 
 
-
-
 public class ContadorMovil extends Activity implements MessageApi.MessageListener,
-                                                        GoogleApiClient.ConnectionCallbacks,
-                                                       DataApi.DataListener {
+        GoogleApiClient.ConnectionCallbacks,
+        DataApi.DataListener,
+        SensorEventListener {
     private Partida partida;
+    private SensorManager sensorManager;
+    boolean actividadActiva;
     private TextView misPuntos, misJuegos, misSets, susPuntos, susJuegos, susSets, hora;
     private Vibrator vibrador;
     private long[] vibrEntrada = {0l, 500};
@@ -60,21 +65,27 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
     private String sSusPuntos;
     private String sSusSets;
 
-
+    private Boolean isFirst = true;
+    private int setMio;
+    private int setSuyo;
+    ContadorSingleton contadorPasos;
+    private int misPasosIni;
+    private int misPasos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.wtf("Partida Movil", "pasado onCreate");
         setContentView(R.layout.contador_movil);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Log.wtf("Partida Movil", "pasado Set Content View");
         // Evitar que entre en modo ambiente .... ¿entra, el emulador?
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         Log.wtf("Partida Movil", "ANTES de llamara al contructor de PARTIDA que es de COMUN");
         apiClient = new GoogleApiClient.Builder(this).addApi(Wearable.API).addConnectionCallbacks(this).build();
         Log.wtf("Partida Movil", "apiClient Creado");
-       // parametros = this.getIntent().getExtras();
-
+        // parametros = this.getIntent().getExtras();
+        contadorPasos = ContadorSingleton.getContadorSingletonInstance();
         partida = new Partida();
         Log.wtf("Partida Movil", "PARTIDA creada");
         vibrador = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -133,7 +144,7 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
         });
         susPuntos.setOnTouchListener(new View.OnTouchListener() {
             GestureDetector detector = new DireccionesGestureDetector(ContadorMovil.this, new DireccionesGestureDetector.SimpleOnDireccionesGestureListener() {
-             @Override
+                @Override
                 public boolean onDerecha(MotionEvent e1, MotionEvent e2, float distX, float distY) {
                     partida.puntoPara(false);
                     vibrador.vibrate(vibrEntrada, -1);
@@ -174,12 +185,11 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
                 dataItems.release();
             }
         });
-
     }
 
     void actualizaNumeros(Boolean lInic) {
         Log.wtf("Partida Movil", "ActualizaNúmeros");
-        if (lInic){
+        if (lInic) {
             misPuntos.setText("0");
             susPuntos.setText("0");
             misJuegos.setText("0");
@@ -193,14 +203,19 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
             // y desde Contador "reinicio" o pido datos
             /*MainActivity.contadorPasos.init();
             MainActivity.contadorPasos.getContadorPasos()*/
+        } else {
+            misPuntos.setText(partida.getMisPuntos());
+            susPuntos.setText(partida.getSusPuntos());
+            misJuegos.setText(partida.getMisJuegos());
+            susJuegos.setText(partida.getSusJuegos());
+            misSets.setText(partida.getMisSets());
+            susSets.setText(partida.getSusSets());
+            if ((Integer.parseInt(partida.getMisSets()) != setMio) ||
+                    (Integer.parseInt(partida.getSusSets()) != setSuyo)) {
+                int total = misPasos - misPasosIni;
+                Toast.makeText(this, String.valueOf(total), Toast.LENGTH_SHORT).show();
+            }
         }
-        else{
-        misPuntos.setText(partida.getMisPuntos());
-        susPuntos.setText(partida.getSusPuntos());
-        misJuegos.setText(partida.getMisJuegos());
-        susJuegos.setText(partida.getSusJuegos());
-        misSets.setText(partida.getMisSets());
-        susSets.setText(partida.getSusSets());}
     }
 
     void actualizaNumerosParam() {
@@ -219,7 +234,12 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
     protected void onStart() {
         super.onStart();
         Log.wtf("Partida Movil", "OnStart");
-         apiClient.connect();
+        apiClient.connect();
+        isFirst = true;
+        // Inicializo con los pasos actuales
+        contadorPasos.init(contadorPasos.getPasos());
+        setMio = Integer.parseInt(misSets.getText().toString());
+        setSuyo = Integer.parseInt(susSets.getText().toString());
     }
 
 
@@ -287,7 +307,37 @@ public class ContadorMovil extends Activity implements MessageApi.MessageListene
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        actividadActiva = true;
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if (sensor != null) {
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI);
+        } else {
+            Toast.makeText(this, "¡Contador de pasos no encontrado!", Toast.LENGTH_LONG).show();
+        }
+    }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (actividadActiva) {
+            //contadorPasos.setPasos(Math.round(event.values[0]));
+            misPasos = Math.round(event.values[0]);
+            Toast.makeText(this, "Pasos = " + String.valueOf(misPasosIni), Toast.LENGTH_SHORT).show();
+        }
+        else {
+            misPasosIni  = Math.round(event.values[0]);
+            //contadorPasos.init(Math.round(event.values[0]));
+            misPasos = Math.round(event.values[0]);
+            Toast.makeText(this, "COMIENZO= " + String.valueOf(misPasosIni), Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
-}
+        @Override protected void onPause () {
+            super.onPause();
+            actividadActiva = false;
+        }// si desregistras el último, el hardware deja de contar pasos // sensorManager.unregisterListener(this); }
+    }
